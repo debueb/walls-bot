@@ -44,7 +44,6 @@ class Bot {
 
         this.bot.on('inline_query', (ctx) => {
             let msg = ctx.inlineQuery.query || '';
-            console.log(msg);
             try {
                 let day = this.getDay(msg);
                 let time = this.getTime(msg);
@@ -87,7 +86,6 @@ class Bot {
                         }]);
                     })
             } catch (err) {
-                console.log(err);
                 ctx.answerInlineQuery([{ "id": "invalid", "title": "Falsches Format", "description": "Richtiges Format: Mo 18:00", "type": "article", "input_message_content": { "message_text": "Frage mich in folgendem Format: Di 17:00", "parse_mode": "Markdown" } }]);
             }
         })
