@@ -17,14 +17,21 @@ class Bot {
         bot.telegram.setWebhook(`${this.url}/${secret}`).then(() => {
             bot.startWebhook(`/${secret}`, null, this.port)
             console.log(`Listening on ${this.url}/${secret}`);
+            bot.telegram.getMe().then((botInfo) => {
+                this.botName = botInfo.username
+            })
+        })
+
+        bot.command('help', (ctx) => {
+            return ctx.reply(`Schick mir Tag und Uhrzeit und ich sage dir, ob noch ein Platz bei walls.de frei ist. Tipp: Du kannst mich auch in anderen Chats inline verwenden, mit @${this.botName} Mo 12:00`);
         })
 
         bot.on('message', (ctx) => {
-            handleMessage(ctx.message.text || '');
+            this.handleMessage(ctx, ctx.message.text || '');
         })
 
         bot.on('edited_message', (ctx) => {
-            handleMessage(ctx.editedMessage.text || '');
+            this.handleMessage(ctx, ctx.editedMessage.text || '');
         })
 
         bot.on('inline_query', (ctx) => {
@@ -79,7 +86,7 @@ class Bot {
         })
     }
 
-    handleMessage(msg){
+    handleMessage(ctx, msg){
         try {
             let day = this.getDay(msg);
             let time = this.getTime(msg);
