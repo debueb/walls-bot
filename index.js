@@ -26,5 +26,5 @@ switch(env){
         });
         break;
     default:
-        initBot(process.ENV.APPLICATION_URL);
+        initBot(process.env.APPLICATION_URL);
 }
