@@ -9,7 +9,8 @@ require('moment/locale/de');
 class Bot {
     constructor(url, port, telegramApiToken, backendUrl, iconUrl) {
         Object.assign(this, { url, port, telegramApiToken, backendUrl, iconUrl });
-        this.inlineUrl =  (this.backendUrl === '') ? 'https://walls.de' : this.backendUrl;
+        //Telegram Bot API does not allow localhost. We use a default
+        this.inlineUrl =  (this.backendUrl === 'http://localhost:8080') ? 'https://walls.de' : this.backendUrl;
     }
 
     init() {
