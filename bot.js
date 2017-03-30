@@ -9,38 +9,45 @@ require('moment/locale/de');
 class Bot {
     constructor(url, port, telegramApiToken, backendUrl, iconUrl) {
         Object.assign(this, { url, port, telegramApiToken, backendUrl, iconUrl });
+        this.inlineUrl =  (this.backendUrl === '') ? 'https://walls.de' : this.backendUrl;
     }
 
     init() {
-        const bot = new Telegraf(this.telegramApiToken)
+        this.bot = new Telegraf(this.telegramApiToken)
         const secret = crypto.randomBytes(64).toString('hex');
-        bot.telegram.setWebhook(`${this.url}/${secret}`).then(() => {
-            bot.startWebhook(`/${secret}`, null, this.port)
+        this.bot.telegram.setWebhook(`${this.url}/${secret}`).then(() => {
+            this.bot.startWebhook(`/${secret}`, null, this.port)
             console.log(`Listening on ${this.url}/${secret}`);
-            bot.telegram.getMe().then((botInfo) => {
+            this.bot.telegram.getMe().then((botInfo) => {
                 this.botName = botInfo.username
             })
         })
 
-        bot.command(['start', 'help'], (ctx) => {
+        this.bot.command(['start', 'help'], (ctx) => {
             return ctx.reply(`Schick mir Tag und Uhrzeit und ich sage dir, ob noch ein Platz bei walls.de frei ist. Tipp: Du kannst mich auch in anderen Chats inline verwenden, mit @${this.botName} Mo 12:00`);
         })
 
-        bot.on('message', (ctx) => {
-            this.handleMessage(ctx, ctx.message.text || '');
+        this.bot.on(['message', 'edited_message'], (ctx) => {
+            try {
+                let msg = ctx.message.text || ctx.editedMessage.text || '';
+                let day = this.getDay(msg);
+                let time = this.getTime(msg);
+                this.getOffers(day, time)
+                    .then(offers => {
+                        let response = `${this.getOfferText(offers)} Jetzt buchen: ${this.inlineUrl}/bookings?date=${day}`;
+                        ctx.reply(response, { text: response, parse_mode: 'Markdown', disable_web_page_preview: true });
+                    })
+            } catch (err) {
+                ctx.reply(`Anwendung: Mo 18:00`);
+            }
         })
 
-        bot.on('edited_message', (ctx) => {
-            this.handleMessage(ctx, ctx.editedMessage.text || '');
-        })
-
-        bot.on('inline_query', (ctx) => {
+        this.bot.on('inline_query', (ctx) => {
             let msg = ctx.inlineQuery.query || '';
             console.log(msg);
             try {
                 let day = this.getDay(msg);
                 let time = this.getTime(msg);
-                let inlineUrl = (this.backendUrl === 'http://localhost:8080') ? 'https://walls.de' : this.backendUrl;
                 this.getOffers(day, time)
                     .then(offers => {
                         if (offers.length == 0) {
@@ -53,10 +60,10 @@ class Bot {
                             cache_time: 0,
                             description: `${this.humanDateFormat(day)} ${time}. Jetzt buchen`,
                             type: "article",
-                            url: `${inlineUrl}/bookings?date=${day}`,
+                            url: `${this.inlineUrl}/bookings?date=${day}`,
                             thumb_url: this.iconUrl,
                             input_message_content: {
-                                message_text: `${this.humanDateFormat(day)} ${time} ${msg} [Jetzt buchen](${inlineUrl}/bookings?date=${day})`,
+                                message_text: `${this.humanDateFormat(day)} ${time} ${msg} [Jetzt buchen](${this.inlineUrl}/bookings?date=${day})`,
                                 disable_web_page_preview: true,
                                 parse_mode: "Markdown"
                             }
@@ -70,10 +77,10 @@ class Bot {
                             title: `Nix mehr frei`,
                             description: `Wieder zu spät dran, wa! Andere Zeiten:`,
                             type: "article",
-                            url: `${inlineUrl}/bookings?date=${day}`,
+                            url: `${this.inlineUrl}/bookings?date=${day}`,
                             thumb_url: this.iconUrl,
                             input_message_content: {
-                                message_text: `${this.humanDateFormat(day)} ${time} nix mehr frei [Andere Zeiten](${inlineUrl}/bookings?date=${day})`,
+                                message_text: `${this.humanDateFormat(day)} ${time} nix mehr frei [Andere Zeiten](${this.inlineUrl}/bookings?date=${day})`,
                                 disable_web_page_preview: true,
                                 parse_mode: "Markdown"
                             }
@@ -84,20 +91,6 @@ class Bot {
                 ctx.answerInlineQuery([{ "id": "invalid", "title": "Falsches Format", "description": "Richtiges Format: Mo 18:00", "type": "article", "input_message_content": { "message_text": "Frage mich in folgendem Format: Di 17:00", "parse_mode": "Markdown" } }]);
             }
         })
-    }
-
-    handleMessage(ctx, msg){
-        try {
-            let day = this.getDay(msg);
-            let time = this.getTime(msg);
-            this.getOffers(day, time)
-                .then(offers => {
-                    let response = this.getOfferText(offers);
-                    ctx.reply(response, { text: response, parse_mode: 'Markdown', disable_web_page_preview: true });
-                })
-        } catch (err) {
-            ctx.reply(`Anwendung: Mo 18:00`);
-        }
     }
 
     getDay(msg) {
