@@ -20,12 +20,12 @@ class Bot {
             this.bot.startWebhook(`/${secret}`, null, this.port)
             console.log(`Listening on ${this.url}/${secret}`);
             this.bot.telegram.getMe().then((botInfo) => {
-                this.botName = botInfo.username
+                this.helpMsg = `Schick mir Tag und Uhrzeit und ich sage dir, ob noch ein Platz bei walls.de frei ist. Tipp: Du kannst mich auch in anderen Chats inline verwenden, mit @${this.botInfo.username} Mo 12:00`;
             })
         })
 
         this.bot.command(['start', 'help'], (ctx) => {
-            return ctx.reply(`Schick mir Tag und Uhrzeit und ich sage dir, ob noch ein Platz bei walls.de frei ist. Tipp: Du kannst mich auch in anderen Chats inline verwenden, mit @${this.botName} Mo 12:00`);
+            return ctx.reply(this.helpMsg);
         })
 
         this.bot.on(['message', 'edited_message'], (ctx) => {
@@ -39,7 +39,7 @@ class Bot {
                         ctx.reply(response, { text: response, parse_mode: 'Markdown', disable_web_page_preview: true });
                     })
             } catch (err) {
-                ctx.reply(`Anwendung: Mo 18:00`);
+                ctx.reply(this.helpMsg);
             }
         })
 
