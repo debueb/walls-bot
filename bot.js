@@ -140,17 +140,15 @@ class Bot {
     }
 
     getOffers(day, time) {
-        return new Promise(
-            function (resolve, reject) {
-
-                fetch(`${this.backendUrl}/api/offers/${day}/${time}`)
-                    .then(function (res) {
-                        return res.json();
-                    }).then(function (offers) {
-                        resolve(offers);
-                    });
-            }
-        );
+        return new Promise( (resolve, reject) => {
+            console.log('hi'+this);
+            fetch(`${this.backendUrl}/api/offers/${day}/${time}`)
+                .then(function (res) {
+                    return res.json();
+                }).then(function (offers) {
+                    resolve(offers);
+                });
+            });
     }
 
     getOfferText(offers) {
