@@ -22,7 +22,7 @@ class Bot {
             })
         })
 
-        bot.command('help', (ctx) => {
+        bot.command(['start', 'help'], (ctx) => {
             return ctx.reply(`Schick mir Tag und Uhrzeit und ich sage dir, ob noch ein Platz bei walls.de frei ist. Tipp: Du kannst mich auch in anderen Chats inline verwenden, mit @${this.botName} Mo 12:00`);
         })
 
