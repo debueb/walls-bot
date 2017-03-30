@@ -1,0 +1,19 @@
+{
+  "name": "walls-bot",
+  "version": "1.0.0",
+  "description": "telegram bot for walls.de",
+  "main": "index.js",
+  "author": "",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "crypto": "0.0.3",
+    "express": "^4.15.2",
+    "localtunnel": "^1.8.2",
+    "moment": "^2.18.1",
+    "node-fetch": "^1.6.3",
+    "telegraf": "^3.6.7",
+    "underscore": "^1.8.3"
+  }
+}
