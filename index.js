@@ -6,6 +6,11 @@ const   localtunnel         = require('localtunnel'),
         backendUrl          = process.env.BACKEND_URL || 'http://localhost:8080',
         iconUrl             = process.env.ICON_URL;
 
+const initBot = function(url){
+    let bot = new Bot(url, port, telegramApiToken, backendUrl, iconUrl);
+    bot.init();
+}
+
 switch(env){
     case "development":
         let tunnel = localtunnel(port, function(err, tunnel) {
@@ -22,9 +27,4 @@ switch(env){
         break;
     default:
         initBot(process.ENV.APPLICATION_URL);
-}
-
-let initBot = function(url){
-    let bot = new Bot(url, port, telegramApiToken, backendUrl, iconUrl);
-    bot.init();
 }
