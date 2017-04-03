@@ -133,7 +133,6 @@ class Bot {
 
     getOffers(day, time) {
         return new Promise( (resolve, reject) => {
-            console.log('hi'+this);
             fetch(`${this.backendUrl}/api/offers/${day}/${time}`)
                 .then(function (res) {
                     return res.json();
